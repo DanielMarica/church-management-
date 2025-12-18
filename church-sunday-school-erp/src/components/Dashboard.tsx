@@ -95,30 +95,30 @@ export default function Dashboard({ profile }: DashboardProps) {
 
   return (
     <div className="space-y-4">
-      {/* Header - Smaller */}
+      {/* Header - Responsive */}
       <div>
-        <h1 className="text-2xl font-bold mb-1">
+        <h1 className="text-xl md:text-2xl font-bold mb-1">
           Welcome back, {profile?.full_name || 'User'}!
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs md:text-sm text-muted-foreground">
           Heres an overview of your Sunday School activities
         </p>
       </div>
 
-      {/* Stats Grid - Much Smaller */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Stats Grid - Responsive: 1 col mobile, 2 tablet, 4 desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.title} className="border-0 shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-4">
+              <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3 md:px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
                 <Icon className="w-3.5 h-3.5 text-muted-foreground" />
               </CardHeader>
-              <CardContent className="pb-3 px-4">
-                <div className="text-2xl font-bold">{stat.value}</div>
+              <CardContent className="pb-3 px-3 md:px-4">
+                <div className="text-xl md:text-2xl font-bold">{stat.value}</div>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {stat.description}
                 </p>
@@ -128,13 +128,13 @@ export default function Dashboard({ profile }: DashboardProps) {
         })}
       </div>
 
-      {/* Quick Actions - Smaller */}
+      {/* Quick Actions - Responsive: 1 col mobile, 3 desktop */}
       <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-2 pt-4 px-4">
-          <CardTitle className="text-base">Quick Actions</CardTitle>
+        <CardHeader className="pb-2 pt-4 px-3 md:px-4">
+          <CardTitle className="text-sm md:text-base">Quick Actions</CardTitle>
           <CardDescription className="text-xs">Common tasks to get started</CardDescription>
         </CardHeader>
-        <CardContent className="px-4 pb-4">
+        <CardContent className="px-3 md:px-4 pb-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <Button
               variant="outline"
@@ -145,7 +145,7 @@ export default function Dashboard({ profile }: DashboardProps) {
               </div>
               <div className="text-left flex-1">
                 <h3 className="font-semibold text-xs">Add New Child</h3>
-                <p className="text-xs text-muted-foreground">Register a student</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">Register a student</p>
               </div>
             </Button>
 
@@ -158,7 +158,7 @@ export default function Dashboard({ profile }: DashboardProps) {
               </div>
               <div className="text-left flex-1">
                 <h3 className="font-semibold text-xs">Schedule Class</h3>
-                <p className="text-xs text-muted-foreground">Plan a session</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">Plan a session</p>
               </div>
             </Button>
 
@@ -171,19 +171,19 @@ export default function Dashboard({ profile }: DashboardProps) {
               </div>
               <div className="text-left flex-1">
                 <h3 className="font-semibold text-xs">Create Course</h3>
-                <p className="text-xs text-muted-foreground">Start curriculum</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">Start curriculum</p>
               </div>
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Activity - Minimal */}
+      {/* Recent Activity - Responsive */}
       <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-1 pt-3 px-4">
+        <CardHeader className="pb-1 pt-3 px-3 md:px-4">
           <CardTitle className="text-sm">Recent Activity</CardTitle>
         </CardHeader>
-        <CardContent className="px-4 pb-3">
+        <CardContent className="px-3 md:px-4 pb-3">
           <div className="text-center py-2 text-muted-foreground">
             <p className="text-xs">No recent activity</p>
           </div>

@@ -36,7 +36,7 @@ function App() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeModule, setActiveModule] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
@@ -141,30 +141,41 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 flex gap-4 overflow-hidden">
-      {/* Fixed Sidebar with Rounded Design */}
+    <div className="min-h-screen bg-gray-50 md:p-4 flex gap-4 overflow-hidden relative">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Responsive */}
       <aside
-        className={`bg-white rounded-3xl shadow-lg transition-all duration-300 flex flex-col ${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } h-[calc(100vh-2rem)]`}
+        className={`bg-white shadow-lg transition-all duration-300 flex flex-col z-50
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0 md:rounded-3xl
+          fixed md:relative
+          inset-y-0 left-0
+          w-64 md:w-64
+          h-screen md:h-[calc(100vh-2rem)]
+        `}
       >
         {/* Header */}
         <div className="h-16 flex items-center justify-between px-4 flex-shrink-0">
-          {sidebarOpen && (
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-                <Church className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="font-bold text-lg">Sunday School</h1>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+              <Church className="w-6 h-6 text-white" />
             </div>
-          )}
+            <h1 className="font-bold text-lg">Sunday School</h1>
+          </div>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hover:bg-purple-100 hover:text-purple-600 rounded-xl transition-colors"
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden hover:bg-purple-100 hover:text-purple-600 rounded-xl transition-colors"
           >
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            <X className="w-5 h-5" />
           </Button>
         </div>
 
@@ -181,29 +192,25 @@ function App() {
                 {profile.full_name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            {sidebarOpen && (
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate text-gray-900">
-                  {profile.full_name}
-                </p>
-                <p className="text-xs text-gray-500 capitalize">
-                  {profile.role}
-                </p>
-              </div>
-            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm truncate text-gray-900">
+                {profile.full_name}
+              </p>
+              <p className="text-xs text-gray-500 capitalize">
+                {profile.role}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Menu Label */}
-        {sidebarOpen && (
-          <div className="px-4 mb-2 flex-shrink-0">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              Menu
-            </p>
-          </div>
-        )}
+        <div className="px-4 mb-2 flex-shrink-0">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Menu
+          </p>
+        </div>
 
-        {/* Navigation - Takes remaining space */}
+        {/* Navigation */}
         <div className="flex-1 overflow-hidden px-3">
           <ScrollArea className="h-full">
             <nav className="space-y-1 pb-4">
@@ -213,19 +220,18 @@ function App() {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setActiveModule(item.id)}
+                    onClick={() => {
+                      setActiveModule(item.id);
+                      setSidebarOpen(false);
+                    }}
                     className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all ${
-                      !sidebarOpen && 'justify-center px-2'
-                    } ${
                       isActive
                         ? 'bg-black text-white shadow-lg'
                         : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
                     }`}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
-                    {sidebarOpen && (
-                      <span className="font-medium text-sm">{item.label}</span>
-                    )}
+                    <span className="font-medium text-sm">{item.label}</span>
                   </button>
                 );
               })}
@@ -234,41 +240,43 @@ function App() {
         </div>
 
         {/* General Label */}
-        {sidebarOpen && (
-          <div className="px-4 mb-2 flex-shrink-0">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              General
-            </p>
-          </div>
-        )}
+        <div className="px-4 mb-2 flex-shrink-0">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            General
+          </p>
+        </div>
 
-        {/* Sign Out - Stays at bottom */}
+        {/* Sign Out */}
         <div className="p-3 flex-shrink-0">
           <button
             onClick={handleSignOut}
-            className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-red-600 hover:bg-red-50 transition-all ${
-              !sidebarOpen && 'justify-center px-2'
-            }`}
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-red-600 hover:bg-red-50 transition-all"
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
-            {sidebarOpen && <span className="font-medium text-sm">Logout</span>}
+            <span className="font-medium text-sm">Logout</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content - Hidden scrollbar with custom CSS */}
+      {/* Main Content - Responsive */}
       <main 
-        className="flex-1 bg-white rounded-3xl shadow-sm p-6 h-[calc(100vh-2rem)] overflow-y-auto scrollbar-hide"
-        style={{
-          scrollbarWidth: 'none', /* Firefox */
-          msOverflowStyle: 'none'  /* IE and Edge */
-        }}
+        className="flex-1 bg-white shadow-sm overflow-y-auto md:rounded-3xl h-screen md:h-[calc(100vh-2rem)] p-4 md:p-6"
       >
-        <style jsx>{`
-          main::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
-          }
-        `}</style>
+        {/* Mobile Menu Button */}
+        <div className="md:hidden mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold">
+            {menuItems.find(item => item.id === activeModule)?.label}
+          </h2>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-xl"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+        </div>
+
         {renderModule()}
       </main>
     </div>
