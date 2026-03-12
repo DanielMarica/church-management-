@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './lib/supabase';
+import { isSupabaseEnabled, supabase } from './lib/supabase';
 import type { Profile } from '@/src/types/database';
 import {
   Calendar,
@@ -38,8 +38,24 @@ function App() {
   const [activeModule, setActiveModule] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const isOfflineMode = !isSupabaseEnabled || !supabase;
+
+  const offlineProfile: Profile = {
+    id: 'offline-user',
+    email: 'offline@local.dev',
+    full_name: 'Mode Local',
+    role: 'admin',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
 
   useEffect(() => {
+    if (isOfflineMode || !supabase) {
+      setProfile(offlineProfile);
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -62,9 +78,14 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isOfflineMode]);
 
   const loadProfile = async (userId: string) => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -82,6 +103,13 @@ function App() {
   };
 
   const handleSignOut = async () => {
+    if (!supabase) {
+      setUser(null);
+      setProfile(offlineProfile);
+      setActiveModule('dashboard');
+      return;
+    }
+
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
@@ -98,13 +126,15 @@ function App() {
     );
   }
 
-  if (!user || !profile) {
+  if (!isOfflineMode && (!user || !profile)) {
     return showRegister ? (
       <Register onBackToLogin={() => setShowRegister(false)} />
     ) : (
       <Login onSwitchToRegister={() => setShowRegister(true)} />
     );
   }
+
+  const currentProfile = profile ?? offlineProfile;
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -120,23 +150,23 @@ function App() {
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard':
-        return <Dashboard profile={profile} />;
+        return <Dashboard profile={currentProfile} />;
       case 'children':
-        return <Children profile={profile} />;
+        return <Children profile={currentProfile} />;
       case 'teams':
-        return <Teams profile={profile} />;
+        return <Teams profile={currentProfile} />;
       case 'courses':
-        return <Courses profile={profile} />;
+        return <Courses profile={currentProfile} />;
       case 'planning':
-        return <Planning profile={profile} />;
+        return <Planning profile={currentProfile} />;
       case 'formation':
-        return <Formation profile={profile} />;
+        return <Formation profile={currentProfile} />;
       case 'forum':
-        return <Forum profile={profile} />;
+        return <Forum profile={currentProfile} />;
       case 'lesson-stocks':
-        return <LessonStocks profile={profile} />;
+        return <LessonStocks profile={currentProfile} />;
       default:
-        return <Dashboard profile={profile} />;
+        return <Dashboard profile={currentProfile} />;
     }
   };
 
@@ -189,15 +219,15 @@ function App() {
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
               <AvatarFallback className="bg-gradient-to-br from-purple-500 to-purple-600 text-white font-semibold">
-                {profile.full_name.charAt(0).toUpperCase()}
+                {currentProfile.full_name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate text-gray-900">
-                {profile.full_name}
+                {currentProfile.full_name}
               </p>
               <p className="text-xs text-gray-500 capitalize">
-                {profile.role}
+                {currentProfile.role}
               </p>
             </div>
           </div>

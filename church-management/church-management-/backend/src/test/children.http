@@ -1,0 +1,44 @@
+@hostname = localhost:8080
+
+### Lister tous les enfants
+GET http://{{hostname}}/api/children
+Content-Type: application/json
+
+### Rechercher un enfant
+GET http://{{hostname}}/api/children?search=marie
+Content-Type: application/json
+
+### Détail d'un enfant
+GET http://{{hostname}}/api/children/REMPLACE-PAR-UN-UUID
+Content-Type: application/json
+
+### Ajouter un enfant
+POST http://{{hostname}}/api/children
+Content-Type: application/json
+
+{
+  "first_name": "Emma",
+  "last_name": "Dupont",
+  "date_of_birth": "2015-04-12",
+  "gender": "female",
+  "parent_name": "Marie Dupont",
+  "parent_phone": "+32 470 12 34 56",
+  "parent_email": "marie.dupont@example.com",
+  "allergies": "Arachides",
+  "medical_notes": null,
+  "special_needs": null,
+  "emergency_contact": "+32 470 98 76 54",
+  "notes": "Très timide au début"
+}
+
+### Modifier un enfant
+PATCH http://{{hostname}}/api/children/REMPLACE-PAR-UN-UUID
+Content-Type: application/json
+
+{
+  "notes": "S'est bien intégrée au groupe"
+}
+
+### Désactiver un enfant (soft delete)
+DELETE http://{{hostname}}/api/children/REMPLACE-PAR-UN-UUID
+Content-Type: application/json
