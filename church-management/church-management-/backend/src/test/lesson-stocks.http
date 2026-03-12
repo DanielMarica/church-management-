@@ -1,0 +1,95 @@
+@hostname = localhost:8080
+@baseUrl = http://{{hostname}}/api/lesson-stocks
+@contentType = application/json
+
+### 1. Lister tout le matériel
+GET {{baseUrl}}
+Content-Type: {{contentType}}
+
+### 2. Lister par catégorie
+GET {{baseUrl}}?category=jeux
+Content-Type: {{contentType}}
+
+### 3. Créer sans fichier (JSON)
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Jeu mémoire des versets",
+  "description": "Cartes mémoire pour révision",
+  "category": "jeux",
+  "age_group": "8-12 ans",
+  "is_public": "true"
+}
+
+### 4. Créer avec fichier PDF (multipart)
+POST {{baseUrl}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="title"
+
+Leçon missionnaire PDF
+--WebAppBoundary
+Content-Disposition: form-data; name="description"
+
+Support de cours missionnaire
+--WebAppBoundary
+Content-Disposition: form-data; name="category"
+
+lesson_missionnaire
+--WebAppBoundary
+Content-Disposition: form-data; name="age_group"
+
+10-14 ans
+--WebAppBoundary
+Content-Disposition: form-data; name="is_public"
+
+true
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="lesson.pdf"
+Content-Type: application/pdf
+
+< ./fixtures/lesson.pdf
+--WebAppBoundary--
+
+### 5. Détail d'un matériel — remplace l'ID
+GET {{baseUrl}}/6202dc42-e09f-46c1-bd9b-dbe37f7b5a17
+Content-Type: {{contentType}}
+
+### 6. Modifier sans fichier — remplace l'ID
+PATCH {{baseUrl}}/6202dc42-e09f-46c1-bd9b-dbe37f7b5a17
+Content-Type: {{contentType}}
+
+{
+  "title": "Jeu mémoire des versets - v2",
+  "description": "Version mise à jour",
+  "is_public": "false"
+}
+
+### 7. Modifier avec fichier image — remplace l'ID
+PATCH {{baseUrl}}/6202dc42-e09f-46c1-bd9b-dbe37f7b5a17
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="title"
+
+Leçon biblique illustrée
+--WebAppBoundary
+Content-Disposition: form-data; name="category"
+
+lesson_biblique
+--WebAppBoundary
+Content-Disposition: form-data; name="is_public"
+
+true
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="image.webp"
+Content-Type: image/webp
+
+< ./fixtures/image.webp
+--WebAppBoundary--
+
+### 8. Supprimer — remplace l'ID
+DELETE {{baseUrl}}/6202dc42-e09f-46c1-bd9b-dbe37f7b5a17
+Content-Type: {{contentType}}

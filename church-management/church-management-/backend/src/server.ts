@@ -8,6 +8,7 @@ import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
 import { healthCheckRouter } from "@/api/healthCheck/healthCheckRouter";
 import childrenRouter from "@/api/children/childrenRouter";
+import lessonStocksRouter from "@/api/lessonStocks/lessonStocksRouter";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -24,6 +25,7 @@ app.use(requestLogger);
 // Routes
 app.use("/health-check", healthCheckRouter);
 app.use("/api/children", childrenRouter);
+app.use("/api/lesson-stocks", lessonStocksRouter);
 
 // Error handlers
 app.use(errorHandler());
