@@ -4,9 +4,15 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { supabase } from "./supabase";
+import sharp from "sharp";
 
 const execAsync = promisify(exec);
 const BUCKET = "lesson-materials";
+
+const PDFTOPPM =
+  process.env.NODE_ENV === "production"
+    ? "/usr/bin/pdftoppm"
+    : "/opt/homebrew/bin/pdftoppm";
 
 export async function uploadFile(
   buffer: Buffer,
@@ -17,10 +23,12 @@ export async function uploadFile(
   const ext = path.extname(originalName);
   const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
 
-  const { error } = await supabase.storage.from(BUCKET).upload(filename, buffer, {
-    contentType: mimeType,
-    upsert: false,
-  });
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(filename, buffer, {
+      contentType: mimeType,
+      upsert: false,
+    });
 
   if (error) throw new Error(`Upload failed: ${error.message}`);
 
@@ -28,25 +36,46 @@ export async function uploadFile(
   return data.publicUrl;
 }
 
-export async function generatePdfPreview(pdfBuffer: Buffer): Promise<string | null> {
+export async function generatePdfPreview(
+  pdfBuffer: Buffer,
+): Promise<string | null> {
   const tmpDir = os.tmpdir();
   const timestamp = Date.now();
   const tmpPdf = path.join(tmpDir, `pdf-${timestamp}.pdf`);
-  const tmpPng = path.join(tmpDir, `pdf-${timestamp}.png`);
+  const tmpBase = path.join(tmpDir, `pdf-${timestamp}`);
 
   try {
     fs.writeFileSync(tmpPdf, pdfBuffer);
 
-    await execAsync(`pdftoppm -png -f 1 -l 1 -r 150 "${tmpPdf}" "${tmpPng.replace(".png", "")}"`);
+    await execAsync(
+      `${PDFTOPPM} -png -f 1 -l 1 -r 150 "${tmpPdf}" "${tmpBase}"`,
+    );
 
-    const generatedFile = `${tmpPng.replace(".png", "")}-1.png`;
+    // pdftoppm génère -1.png ou -01.png selon la version
+    const generated = fs
+      .readdirSync(tmpDir)
+      .find((f) => f.startsWith(path.basename(tmpBase)) && f.endsWith(".png"));
 
-    if (!fs.existsSync(generatedFile)) {
-      throw new Error("Preview generation failed");
-    }
+    if (!generated) throw new Error("Preview generation failed");
 
-    const imgBuffer = fs.readFileSync(generatedFile);
-    const previewUrl = await uploadFile(imgBuffer, "preview.png", "image/png", "previews");
+    const generatedFile = path.join(tmpDir, generated);
+    const rawBuffer = fs.readFileSync(generatedFile);
+    const imgBuffer = await sharp(rawBuffer)
+      .resize(400, 300, { fit: "cover" })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    const previewUrl = await uploadFile(
+      imgBuffer,
+      "preview.jpg",
+      "image/jpeg",
+      "previews",
+    );
+
+    // Cleanup
+    try {
+      fs.unlinkSync(generatedFile);
+    } catch {}
 
     return previewUrl;
   } catch (error) {
@@ -55,9 +84,6 @@ export async function generatePdfPreview(pdfBuffer: Buffer): Promise<string | nu
   } finally {
     try {
       fs.unlinkSync(tmpPdf);
-    } catch {}
-    try {
-      fs.unlinkSync(`${tmpPng.replace(".png", "")}-1.png`);
     } catch {}
   }
 }
