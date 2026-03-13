@@ -9,6 +9,9 @@ import { env } from "@/common/utils/envConfig";
 import { healthCheckRouter } from "@/api/healthCheck/healthCheckRouter";
 import childrenRouter from "@/api/children/childrenRouter";
 import lessonStocksRouter from "@/api/lessonStocks/lessonStocksRouter";
+import { teamsRouter } from './api/teams/teamsRouter';
+import { teachersRouter } from './api/teachers/teachersRouter';
+import { planningRouter } from './api/planning/planningRouter';
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -26,7 +29,9 @@ app.use(requestLogger);
 app.use("/health-check", healthCheckRouter);
 app.use("/api/children", childrenRouter);
 app.use("/api/lesson-stocks", lessonStocksRouter);
-
+app.use('/api/teams', teamsRouter);
+app.use('/api/teachers', teachersRouter);
+app.use('/api/planning', planningRouter);
 // Error handlers
 app.use(errorHandler());
 

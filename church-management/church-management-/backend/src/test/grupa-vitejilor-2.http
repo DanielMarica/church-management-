@@ -1,0 +1,99 @@
+### Variables
+@baseUrl = http://localhost:8080
+@teamId = 359758ea-e445-4283-9120-100e34b6c8f3
+
+### 1. Alexandru Dima
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "29ac3d70-55e5-4bf3-900e-25ff1fbbbb80" }
+
+###
+
+### 2. Ana Popescu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "abae4d22-6ed5-41ad-86a4-781192df0c5b" }
+
+###
+
+### 3. Cristina Stan
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "d425e66a-dce3-4568-ac66-6f4e8bfcfc8e" }
+
+###
+
+### 4. Elena Gheorghe
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "836918a6-1cae-4f6f-851f-c024fe0f73f6" }
+
+###
+
+### 5. Ioana Muresan
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "c3a3d307-a078-426c-addc-af0eadccdf7e" }
+
+###
+
+### 6. Ion Dumitrescu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "2f7b1563-ae3e-48cc-b0fc-cc91aa479b2c" }
+
+###
+
+### 7. Maria Ionescu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "09c69849-2116-42e7-836c-8dceb411571b" }
+
+###
+
+### 8. Mihai Rusu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "de98dd5b-d62e-4954-bcba-fc174bb2266a" }
+
+###
+
+### 9. Petru Constantin
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "2f6795b5-52ca-46a6-8ea9-ed40aaba3649" }
+
+###
+
+### 10. Vasile Popa
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "dfba8a80-76af-4c25-9af2-bc5e67b4df51" }
+
+###
+
+### ─── Vérification ─────────────────────────────────────────────────────────────
+
+### Voir l'équipe avec tous ses membres
+GET {{baseUrl}}/api/teams/{{teamId}}
+
+###
+
+### Générer le planning pour 3 mois
+POST {{baseUrl}}/api/planning/generate
+Content-Type: application/json
+
+{
+  "team_id": "359758ea-e445-4283-9120-100e34b6c8f3",
+  "months": 3
+}

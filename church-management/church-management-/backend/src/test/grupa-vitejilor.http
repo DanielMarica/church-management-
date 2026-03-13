@@ -1,0 +1,143 @@
+### Variables
+@baseUrl = http://localhost:8080
+@teamId = 359758ea-e445-4283-9120-100e34b6c8f3
+
+### ─── IMPORTANT ───────────────────────────────────────────────────────────────
+### Les profiles sont liés à auth.users de Supabase.
+### On ne peut pas créer des profiles directement via l'API Express.
+### Il faut les créer via Supabase Auth, puis les ajouter à l'équipe.
+###
+### ÉTAPE 1 : Exécute ce SQL dans Supabase SQL Editor pour créer 10 profiles :
+###
+### INSERT INTO profiles (id, full_name, email, role, created_at, updated_at)
+### VALUES
+###   (gen_random_uuid(), 'Ana Popescu',     'ana.popescu@church.be',     'teacher', now(), now()),
+###   (gen_random_uuid(), 'Ion Dumitrescu',  'ion.dumitrescu@church.be',  'teacher', now(), now()),
+###   (gen_random_uuid(), 'Maria Ionescu',   'maria.ionescu@church.be',   'teacher', now(), now()),
+###   (gen_random_uuid(), 'Petru Constantin','petru.constantin@church.be','teacher', now(), now()),
+###   (gen_random_uuid(), 'Elena Gheorghe',  'elena.gheorghe@church.be',  'teacher', now(), now()),
+###   (gen_random_uuid(), 'Vasile Popa',     'vasile.popa@church.be',     'teacher', now(), now()),
+###   (gen_random_uuid(), 'Cristina Stan',   'cristina.stan@church.be',   'teacher', now(), now()),
+###   (gen_random_uuid(), 'Mihai Rusu',      'mihai.rusu@church.be',      'teacher', now(), now()),
+###   (gen_random_uuid(), 'Ioana Muresan',   'ioana.muresan@church.be',   'teacher', now(), now()),
+###   (gen_random_uuid(), 'Alexandru Dima',  'alexandru.dima@church.be',  'teacher', now(), now());
+###
+### ÉTAPE 2 : Récupère les UUIDs générés avec :
+### SELECT id, full_name FROM profiles ORDER BY created_at DESC LIMIT 10;
+###
+### ÉTAPE 3 : Remplace les @p1..@p10 ci-dessous par les vrais UUIDs
+### ─────────────────────────────────────────────────────────────────────────────
+
+@p1 = REMPLACE-PAR-UUID-1
+@p2 = REMPLACE-PAR-UUID-2
+@p3 = REMPLACE-PAR-UUID-3
+@p4 = REMPLACE-PAR-UUID-4
+@p5 = REMPLACE-PAR-UUID-5
+@p6 = REMPLACE-PAR-UUID-6
+@p7 = REMPLACE-PAR-UUID-7
+@p8 = REMPLACE-PAR-UUID-8
+@p9 = REMPLACE-PAR-UUID-9
+@p10 = REMPLACE-PAR-UUID-10
+
+### ─── Ajouter les 10 membres à l'équipe ───────────────────────────────────────
+
+### 1. Ana Popescu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p1}}" }
+
+###
+
+### 2. Ion Dumitrescu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p2}}" }
+
+###
+
+### 3. Maria Ionescu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p3}}" }
+
+###
+
+### 4. Petru Constantin
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p4}}" }
+
+###
+
+### 5. Elena Gheorghe
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p5}}" }
+
+###
+
+### 6. Vasile Popa
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p6}}" }
+
+###
+
+### 7. Cristina Stan
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p7}}" }
+
+###
+
+### 8. Mihai Rusu
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p8}}" }
+
+###
+
+### 9. Ioana Muresan
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p9}}" }
+
+###
+
+### 10. Alexandru Dima
+POST {{baseUrl}}/api/teams/{{teamId}}/members
+Content-Type: application/json
+
+{ "profile_id": "{{p10}}" }
+
+###
+
+### ─── Vérification ─────────────────────────────────────────────────────────────
+
+### Voir l'équipe avec tous ses membres
+GET {{baseUrl}}/api/teams/{{teamId}}
+
+###
+
+### Voir tous les teachers
+GET {{baseUrl}}/api/teachers
+
+###
+
+### Générer le planning pour 3 mois
+POST {{baseUrl}}/api/planning/generate
+Content-Type: application/json
+
+{
+  "team_id": "{{teamId}}",
+  "months": 3
+}
