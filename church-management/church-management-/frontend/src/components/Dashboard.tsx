@@ -196,8 +196,7 @@ export default function Dashboard({ profile }: DashboardProps) {
   const statCards: StatCard[] = [
     { title: 'Total Children',        value: stats.totalChildren,   icon: Users,    description: 'Registered students' },
     { title: 'Live Children Present', value: stats.totalChildren,   icon: Users,    description: 'Present today' },
-    { title: 'Upcoming Classes',      value: stats.upcomingClasses, icon: Calendar, description: 'Scheduled sessions' },
-  ];
+    ];
 
   if (loading) {
     return (
@@ -273,8 +272,8 @@ export default function Dashboard({ profile }: DashboardProps) {
                     <Calendar className="w-3.5 h-3.5" />
                   </div>
                   <div className="text-left flex-1">
-                    <h3 className="font-semibold text-xs">Schedule Class</h3>
-                    <p className="text-xs text-muted-foreground">Plan a session</p>
+                    <h3 className="font-semibold text-xs">Propose Number of children</h3>
+                    <p className="text-xs text-muted-foreground">Suggest the number of children</p>
                   </div>
                 </Button>
                 <Button variant="outline" className="h-auto p-3 flex items-center justify-start gap-2 hover:bg-accent hover:text-accent-foreground">
@@ -282,8 +281,8 @@ export default function Dashboard({ profile }: DashboardProps) {
                     <Calendar className="w-3.5 h-3.5" />
                   </div>
                   <div className="text-left flex-1">
-                    <h3 className="font-semibold text-xs">Create Course</h3>
-                    <p className="text-xs text-muted-foreground">Start curriculum</p>
+                    <h3 className="font-semibold text-xs">Ask for impresion</h3>
+                    <p className="text-xs text-muted-foreground">Request a printout</p>
                   </div>
                 </Button>
               </div>

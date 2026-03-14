@@ -12,6 +12,10 @@ import lessonStocksRouter from "@/api/lessonStocks/lessonStocksRouter";
 import { teamsRouter } from './api/teams/teamsRouter';
 import { teachersRouter } from './api/teachers/teachersRouter';
 import { planningRouter } from './api/planning/planningRouter';
+import { attendanceRouter } from './api/attendance/attendanceRouter'
+import { controlCenterRouter } from './api/controlCenter/controlCenterRouter';
+import { foodStocksRouter } from './api/foodStocks/foodStocksRouter';
+
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -32,6 +36,9 @@ app.use("/api/lesson-stocks", lessonStocksRouter);
 app.use('/api/teams', teamsRouter);
 app.use('/api/teachers', teachersRouter);
 app.use('/api/planning', planningRouter);
+app.use('/api/attendance', attendanceRouter);
+app.use('/api/control', controlCenterRouter);
+app.use('/api/food-stocks', foodStocksRouter);
 // Error handlers
 app.use(errorHandler());
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/src/components/ui/dialog';
 import { Badge } from '@/src/components/ui/badge';
-import { Plus, User, Phone, Mail, AlertCircle, Heart, X, Search, Calendar } from 'lucide-react';
+import { Plus, User, Phone, Mail, AlertCircle, Heart, X, Search, Calendar, Camera } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 import type { Profile } from '../types/database';
 
 // ─── Zod Schema ────────────────────────────────────────────────────────────────
@@ -60,6 +62,29 @@ export interface Child {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// ─── Upload Helper ─────────────────────────────────────────────────────────────
+
+async function uploadChildPhoto(childId: string, file: File): Promise<string> {
+  if (!supabase) throw new Error('Supabase not configured');
+  if (!file.type.startsWith('image/')) throw new Error('Fichier invalide');
+  if (file.size > 2 * 1024 * 1024) throw new Error('Maximum 2MB');
+
+  const fileExt = file.name.split('.').pop();
+  const filePath = `${childId}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('children-photo')
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadError) throw new Error(uploadError.message);
+
+  const { data } = supabase.storage
+    .from('children-photo')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -138,10 +163,28 @@ function AddChildForm({ onSuccess }: { onSuccess: (child: Child) => void }) {
   const [errors, setErrors] = useState<Partial<Record<keyof CreateChildPayload, string>>>({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = (field: keyof CreateChildPayload, value: string) => {
     setForm((f) => ({ ...f, [field]: value === '' ? null : value }));
     setErrors((e) => ({ ...e, [field]: undefined }));
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Fichier invalide', { description: 'Sélectionnez une image' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Fichier trop lourd', { description: 'Maximum 2MB' });
+      return;
+    }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -161,6 +204,7 @@ function AddChildForm({ onSuccess }: { onSuccess: (child: Child) => void }) {
 
     setLoading(true);
     try {
+      // 1. Crée l'enfant
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/children`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -173,7 +217,27 @@ function AddChildForm({ onSuccess }: { onSuccess: (child: Child) => void }) {
         return;
       }
 
-      const child = await res.json();
+      let child: Child = await res.json();
+
+      // 2. Upload photo si présente
+      if (photoFile) {
+        try {
+          const photoUrl = await uploadChildPhoto(child.id, photoFile);
+          const updateRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/children/${child.id}`,
+            {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ photo_url: photoUrl }),
+            }
+          );
+          if (updateRes.ok) child = await updateRes.json();
+        } catch (photoError) {
+          console.error('Photo upload failed:', photoError);
+        }
+      }
+
+      toast.success('Enfant ajouté !');
       onSuccess(child);
     } catch {
       setServerError('Impossible de contacter le serveur');
@@ -184,6 +248,41 @@ function AddChildForm({ onSuccess }: { onSuccess: (child: Child) => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
+
+      {/* Photo upload */}
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative">
+          <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden ring-2 ring-border">
+            {photoPreview ? (
+              <Image
+                src={photoPreview}
+                alt="Preview"
+                width={80}
+                height={80}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <User className="w-8 h-8 text-gray-400" />
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute -bottom-1 -right-1 w-7 h-7 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+          >
+            <Camera className="w-3.5 h-3.5 text-white" />
+          </button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoChange}
+        />
+        <p className="text-xs text-muted-foreground">Photo optionnelle — max 2MB</p>
+      </div>
+
       {/* Identité */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
@@ -212,10 +311,7 @@ function AddChildForm({ onSuccess }: { onSuccess: (child: Child) => void }) {
             />
           </Field>
           <Field label="Genre" error={errors.gender} required>
-            <Select
-              value={form.gender ?? ''}
-              onValueChange={(v) => set('gender', v)}
-            >
+            <Select value={form.gender ?? ''} onValueChange={(v) => set('gender', v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner…" />
               </SelectTrigger>
@@ -323,7 +419,7 @@ function AddChildForm({ onSuccess }: { onSuccess: (child: Child) => void }) {
       )}
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Enregistrement…' : 'Ajouter l\'enfant'}
+        {loading ? 'Enregistrement…' : "Ajouter l'enfant"}
       </Button>
     </form>
   );
@@ -349,31 +445,77 @@ function Row({ label, value, alert }: { label: string; value: string; alert?: bo
   );
 }
 
-function ChildCard({ child }: { child: Child }) {
+function ChildCard({ child, onUpdate }: { child: Child; onUpdate?: (updated: Child) => void }) {
   const age = calculateAge(child.date_of_birth);
   const gradient = getAvatarGradient(child.id);
   const hasAlerts = child.allergies || child.medical_notes || child.special_needs;
   const [open, setOpen] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState(child.photo_url);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setCurrentPhotoUrl(child.photo_url);
+  }, [child.photo_url]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Fichier invalide', { description: 'Sélectionnez une image' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Fichier trop lourd', { description: 'Maximum 2MB' });
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const photoUrl = await uploadChildPhoto(child.id, file);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/children/${child.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo_url: photoUrl }),
+        }
+      );
+
+      if (res.ok) {
+        const updated: Child = await res.json();
+        setCurrentPhotoUrl(updated.photo_url);
+        onUpdate?.(updated);
+        toast.success('Photo mise à jour !');
+      }
+    } catch (error) {
+      toast.error("Erreur lors de l'upload");
+      console.error(error);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   return (
     <>
+      {/* List row */}
       <div
         onClick={() => setOpen(true)}
         className="flex items-center gap-4 p-4 rounded-xl border bg-card hover:bg-accent/30 transition-colors group h-[88px] cursor-pointer"
       >
         <div className="shrink-0">
-          {child.photo_url ? (
+          {currentPhotoUrl ? (
             <Image
-              src={child.photo_url}
+              src={currentPhotoUrl}
               alt={`${child.first_name} ${child.last_name}`}
               width={56}
               height={56}
               className="w-14 h-14 rounded-full object-cover ring-2 ring-border"
             />
           ) : (
-            <div
-              className={`w-14 h-14 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-lg ring-2 ring-border`}
-            >
+            <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-lg ring-2 ring-border`}>
               {getInitials(child.first_name, child.last_name)}
             </div>
           )}
@@ -394,7 +536,6 @@ function ChildCard({ child }: { child: Child }) {
               </Badge>
             )}
           </div>
-
           <div className="flex items-center gap-3 text-sm text-muted-foreground overflow-hidden">
             <span className="flex items-center gap-1 shrink-0">
               <Calendar className="w-3.5 h-3.5" />
@@ -439,17 +580,49 @@ function ChildCard({ child }: { child: Child }) {
         </div>
       </div>
 
+      {/* Detail dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shrink-0`}>
-                {child.photo_url ? (
-                  <Image src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} width={40} height={40} className="rounded-full object-cover" />
-                ) : (
-                  getInitials(child.first_name, child.last_name)
-                )}
+
+              {/* Avatar avec bouton upload */}
+              <div className="relative shrink-0">
+                <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-border">
+                  {currentPhotoUrl ? (
+                    <Image
+                      src={currentPhotoUrl}
+                      alt={`${child.first_name} ${child.last_name}`}
+                      width={48}
+                      height={48}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold`}>
+                      {getInitials(child.first_name, child.last_name)}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                  disabled={uploadingPhoto}
+                  className="absolute -bottom-1 -right-1 w-5 h-5 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                  {uploadingPhoto ? (
+                    <div className="w-2.5 h-2.5 border border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-2.5 h-2.5 text-white" />
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                />
               </div>
+
               {child.first_name} {child.last_name}
             </DialogTitle>
           </DialogHeader>
@@ -457,7 +630,14 @@ function ChildCard({ child }: { child: Child }) {
           <div className="space-y-5 text-sm">
             <Section title="Identité">
               <Row label="Âge" value={`${age} ans`} />
-              <Row label="Date de naissance" value={new Date(child.date_of_birth).toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' })} />
+              <Row
+                label="Date de naissance"
+                value={new Date(child.date_of_birth).toLocaleDateString('fr-BE', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              />
               <Row label="Genre" value={GENDER_LABELS[child.gender]} />
             </Section>
 
@@ -486,7 +666,14 @@ function ChildCard({ child }: { child: Child }) {
             )}
 
             <Section title="Inscription">
-              <Row label="Inscrit le" value={new Date(child.created_at).toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' })} />
+              <Row
+                label="Inscrit le"
+                value={new Date(child.created_at).toLocaleDateString('fr-BE', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              />
             </Section>
           </div>
         </DialogContent>
@@ -499,9 +686,15 @@ function ChildCard({ child }: { child: Child }) {
 
 interface ChildrenProps {
   profile: Profile;
+  openCreateDialog?: boolean;
+  onCreateDialogConsumed?: () => void;
 }
 
-export default function Children({ profile }: ChildrenProps) {
+export default function Children({
+  profile,
+  openCreateDialog = false,
+  onCreateDialogConsumed,
+}: ChildrenProps) {
   void profile;
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
@@ -511,6 +704,12 @@ export default function Children({ profile }: ChildrenProps) {
   useEffect(() => {
     fetchChildren();
   }, []);
+
+  useEffect(() => {
+    if (!openCreateDialog) return;
+    setDialogOpen(true);
+    onCreateDialogConsumed?.();
+  }, [openCreateDialog, onCreateDialogConsumed]);
 
   async function fetchChildren() {
     setLoading(true);
@@ -529,6 +728,10 @@ export default function Children({ profile }: ChildrenProps) {
   function handleChildAdded(child: Child) {
     setChildren((prev) => [child, ...prev]);
     setDialogOpen(false);
+  }
+
+  function handleChildUpdated(updated: Child) {
+    setChildren((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
   }
 
   const filtered = children.filter((c) => {
@@ -622,7 +825,11 @@ export default function Children({ profile }: ChildrenProps) {
           ) : (
             <div className="space-y-2">
               {filtered.map((child) => (
-                <ChildCard key={child.id} child={child} />
+                <ChildCard
+                  key={child.id}
+                  child={child}
+                  onUpdate={handleChildUpdated}
+                />
               ))}
             </div>
           )}

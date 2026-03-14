@@ -1,0 +1,302 @@
+@baseUrl = http://localhost:8080/api
+@teamId = 359758ea-e445-4283-9120-100e34b6c8f3
+
+### 1
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Noah",
+  "last_name": "Martin",
+  "date_of_birth": "2016-03-14",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Sophie Martin",
+  "parent_phone": "0600000001",
+  "parent_email": "parent.noah.martin@example.com"
+}
+
+### 2
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Emma",
+  "last_name": "Bernard",
+  "date_of_birth": "2017-06-21",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Julie Bernard",
+  "parent_phone": "0600000002",
+  "parent_email": "parent.emma.bernard@example.com"
+}
+
+### 3
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Lucas",
+  "last_name": "Petit",
+  "date_of_birth": "2015-11-02",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Marc Petit",
+  "parent_phone": "0600000003",
+  "parent_email": "parent.lucas.petit@example.com"
+}
+
+### 4
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Lina",
+  "last_name": "Dubois",
+  "date_of_birth": "2016-08-09",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Nadia Dubois",
+  "parent_phone": "0600000004",
+  "parent_email": "parent.lina.dubois@example.com"
+}
+
+### 5
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Adam",
+  "last_name": "Garcia",
+  "date_of_birth": "2017-01-17",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Lea Garcia",
+  "parent_phone": "0600000005",
+  "parent_email": "parent.adam.garcia@example.com"
+}
+
+### 6
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Chloe",
+  "last_name": "Roux",
+  "date_of_birth": "2015-04-30",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Claire Roux",
+  "parent_phone": "0600000006",
+  "parent_email": "parent.chloe.roux@example.com"
+}
+
+### 7
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Leo",
+  "last_name": "Fournier",
+  "date_of_birth": "2016-12-12",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Anne Fournier",
+  "parent_phone": "0600000007",
+  "parent_email": "parent.leo.fournier@example.com"
+}
+
+### 8
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Jade",
+  "last_name": "Lambert",
+  "date_of_birth": "2017-09-05",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Paul Lambert",
+  "parent_phone": "0600000008",
+  "parent_email": "parent.jade.lambert@example.com"
+}
+
+### 9
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Ethan",
+  "last_name": "Fontaine",
+  "date_of_birth": "2015-02-18",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Lucie Fontaine",
+  "parent_phone": "0600000009",
+  "parent_email": "parent.ethan.fontaine@example.com"
+}
+
+### 10
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Mila",
+  "last_name": "Chevalier",
+  "date_of_birth": "2016-10-26",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Aline Chevalier",
+  "parent_phone": "0600000010",
+  "parent_email": "parent.mila.chevalier@example.com"
+}
+
+### 11
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Nathan",
+  "last_name": "Robin",
+  "date_of_birth": "2017-03-01",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Sarah Robin",
+  "parent_phone": "0600000011",
+  "parent_email": "parent.nathan.robin@example.com"
+}
+
+### 12
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Louise",
+  "last_name": "Masson",
+  "date_of_birth": "2015-07-13",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Nora Masson",
+  "parent_phone": "0600000012",
+  "parent_email": "parent.louise.masson@example.com"
+}
+
+### 13
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Hugo",
+  "last_name": "Henry",
+  "date_of_birth": "2016-01-22",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Celine Henry",
+  "parent_phone": "0600000013",
+  "parent_email": "parent.hugo.henry@example.com"
+}
+
+### 14
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Ines",
+  "last_name": "Rousseau",
+  "date_of_birth": "2017-11-08",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Karim Rousseau",
+  "parent_phone": "0600000014",
+  "parent_email": "parent.ines.rousseau@example.com"
+}
+
+### 15
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Sacha",
+  "last_name": "Vincent",
+  "date_of_birth": "2015-05-19",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Elodie Vincent",
+  "parent_phone": "0600000015",
+  "parent_email": "parent.sacha.vincent@example.com"
+}
+
+### 16
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Camille",
+  "last_name": "Muller",
+  "date_of_birth": "2016-09-15",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "David Muller",
+  "parent_phone": "0600000016",
+  "parent_email": "parent.camille.muller@example.com"
+}
+
+### 17
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Tom",
+  "last_name": "Lefevre",
+  "date_of_birth": "2017-02-27",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Helene Lefevre",
+  "parent_phone": "0600000017",
+  "parent_email": "parent.tom.lefevre@example.com"
+}
+
+### 18
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Sarah",
+  "last_name": "Faure",
+  "date_of_birth": "2015-12-03",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Olivier Faure",
+  "parent_phone": "0600000018",
+  "parent_email": "parent.sarah.faure@example.com"
+}
+
+### 19
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Yanis",
+  "last_name": "Andre",
+  "date_of_birth": "2016-06-06",
+  "gender": "male",
+  "team_id": "{{teamId}}",
+  "parent_name": "Maya Andre",
+  "parent_phone": "0600000019",
+  "parent_email": "parent.yanis.andre@example.com"
+}
+
+### 20
+POST {{baseUrl}}/children
+Content-Type: application/json
+
+{
+  "first_name": "Eva",
+  "last_name": "Mercier",
+  "date_of_birth": "2017-04-11",
+  "gender": "female",
+  "team_id": "{{teamId}}",
+  "parent_name": "Nicolas Mercier",
+  "parent_phone": "0600000020",
+  "parent_email": "parent.eva.mercier@example.com"
+}

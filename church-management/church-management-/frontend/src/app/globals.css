@@ -132,3 +132,8 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+[data-sonner-toaster] {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}

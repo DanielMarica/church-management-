@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase';
-import type { Teacher, CreateTeacherPayload, UpdateTeacherPayload } from './teachersModel';
+import type { Teacher, CreateTeacherPayload, UpdateTeacherPayload, InviteTeacherPayload } from './teachersModel';
 
 export const teachersRepository = {
 
@@ -79,4 +79,51 @@ export const teachersRepository = {
 
     if (error) throw new Error(error.message);
   },
+
+
+async inviteTeacher(payload: InviteTeacherPayload): Promise<void> {
+  // Utilise le client admin (service_role) pour inviter
+  const { createClient } = await import('@supabase/supabase-js');
+  const adminClient = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { error } = await adminClient.auth.admin.inviteUserByEmail(
+    payload.email,
+    {
+      data: {
+        full_name: payload.full_name,
+        role: payload.role,
+      },
+      redirectTo: `${process.env.FRONTEND_URL}/auth/callback`,
+    }
+  );
+
+  if (error) throw new Error(error.message);
+},
+
+async getProfileWithTeam(id: string): Promise<Teacher | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, role, phone, avatar_url, created_at, updated_at')
+    .eq('id', id)
+    .single();
+
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+
+  const { data: member } = await supabase
+    .from('team_members')
+    .select('team:teams(id, name, color)')
+    .eq('profile_id', id)
+    .eq('is_active', true)
+    .single();
+
+  return {
+    ...data,
+    team: (member as any)?.team ?? null,
+  };
+},
+
 };

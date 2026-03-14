@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { isSupabaseEnabled, supabase } from './lib/supabase';
-import type { Profile } from '@/src/types/database';
+import React, { useState, useEffect } from "react";
+import { isSupabaseEnabled, supabase } from "./lib/supabase";
+import type { Profile } from "@/src/types/database";
 import {
   Calendar,
   Users,
@@ -14,46 +14,59 @@ import {
   Menu,
   X,
   UserCheck,
-} from 'lucide-react';
-import { Button } from '@/src/components/ui/button';
-import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
-import { ScrollArea } from '@/src/components/ui/scroll-area';
-
+  ClipboardList,
+  LayoutGrid,
+} from "lucide-react";
+import { Button } from "@/src/components/ui/button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/components/ui/avatar";
+import { ScrollArea } from "@/src/components/ui/scroll-area";
+import { useRef } from "react";
 // Components
-import Dashboard from './src/components/Dashboard';
-import Children from './src/components/Children';
-import Teams from './src/components/Teams';
-import Teachers from './src/components/Teachers';
-import Courses from './src/components/Courses';
-import Planning from './src/components/Planning';
-import Formation from './src/components/Formation';
-import Forum from './src/components/Forum';
-import LessonStocks from './src/components/LessonStocks';
-import Login from './src/components/Login';
-import Register from './src/components/Register';
-import { User } from '@supabase/supabase-js';
+import Dashboard from "./src/components/Dashboard";
+import Children from "./src/components/Children";
+import Teams from "./src/components/Teams";
+import Teachers from "./src/components/Teachers";
+import Courses from "./src/components/Courses";
+import Planning from "./src/components/Planning";
+import Formation from "./src/components/Formation";
+import Forum from "./src/components/Forum";
+import LessonStocks from "./src/components/LessonStocks";
+import Login from "./src/components/Login";
+import Register from "./src/components/Register";
+import { User } from "@supabase/supabase-js";
+import Attendance from "./src/components/Attendance";
+import ControlCenter from "./src/components/ControlCenter";
+import { toast } from "sonner";
+import ProfilePage from "./src/components/Profile";
+
+const OFFLINE_PROFILE: Profile = {
+  id: "offline-user",
+  email: "offline@local.dev",
+  full_name: "Mode Local",
+  role: "admin",
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeModule, setActiveModule] = useState('dashboard');
+  const [activeModule, setActiveModule] = useState("dashboard");
+  const [openCreateChildFromAttendance, setOpenCreateChildFromAttendance] =
+    useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const isOfflineMode = !isSupabaseEnabled || !supabase;
-
-  const offlineProfile: Profile = {
-    id: 'offline-user',
-    email: 'offline@local.dev',
-    full_name: 'Mode Local',
-    role: 'admin',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  const hasShownWelcome = useRef(false);
 
   useEffect(() => {
     if (isOfflineMode || !supabase) {
-      setProfile(offlineProfile);
+      setProfile(OFFLINE_PROFILE);
       setLoading(false);
       return;
     }
@@ -67,7 +80,9 @@ function App() {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadProfile(session.user.id);
@@ -81,14 +96,32 @@ function App() {
   }, [isOfflineMode]);
 
   const loadProfile = async (userId: string) => {
-    if (!supabase) { setLoading(false); return; }
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
-        .from('profiles').select('*').eq('id', userId).single();
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
       if (error) throw error;
+
       setProfile(data);
-    } catch (error) {
-      console.error('Error loading profile:', error);
+
+      // Toast seulement une fois
+      if (!hasShownWelcome.current) {
+        hasShownWelcome.current = true;
+        toast.success("Connexion réussie !", {
+          description: `Bienvenue ${data.full_name}`,
+        });
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Erreur inconnue";
+      toast.error("Erreur de connexion", { description: message });
     } finally {
       setLoading(false);
     }
@@ -97,13 +130,14 @@ function App() {
   const handleSignOut = async () => {
     if (!supabase) {
       setUser(null);
-      setProfile(offlineProfile);
-      setActiveModule('dashboard');
+      setProfile(OFFLINE_PROFILE);
+      setActiveModule("dashboard");
       return;
     }
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
+    toast.success("Déconnexion réussie");
   };
 
   if (loading) {
@@ -125,32 +159,72 @@ function App() {
     );
   }
 
-  const currentProfile = profile ?? offlineProfile;
+  const currentProfile = profile ?? OFFLINE_PROFILE;
 
   const menuItems = [
-    { id: 'dashboard',     label: 'Dashboard',       icon: LayoutDashboard },
-    { id: 'children',      label: 'Enfants',          icon: Users },
-    { id: 'teachers',      label: 'Professeurs',      icon: UserCheck },
-    { id: 'teams',         label: 'Équipes',          icon: Users },
-    { id: 'courses',       label: 'Cours',            icon: BookOpen },
-    { id: 'planning',      label: 'Planning',         icon: Calendar },
-    { id: 'formation',     label: 'Formation',        icon: GraduationCap },
-    { id: 'forum',         label: 'Forum',            icon: MessageSquare },
-    { id: 'lesson-stocks', label: 'Matériels',        icon: Package },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "children", label: "Enfants", icon: Users },
+    { id: "teachers", label: "Professeurs", icon: UserCheck },
+    { id: "teams", label: "Équipes", icon: Users },
+    { id: "courses", label: "Cours", icon: BookOpen },
+    { id: "attendance", label: "Présences", icon: ClipboardList },
+    { id: "control-center", label: "Centre de Contrôle", icon: LayoutGrid },
+    { id: "planning", label: "Planning", icon: Calendar },
+    { id: "formation", label: "Formation", icon: GraduationCap },
+    { id: "forum", label: "Forum", icon: MessageSquare },
+    { id: "lesson-stocks", label: "Matériels", icon: Package },
   ];
 
   const renderModule = () => {
     switch (activeModule) {
-      case 'dashboard':     return <Dashboard profile={currentProfile} />;
-      case 'children':      return <Children profile={currentProfile} />;
-      case 'teachers':      return <Teachers profile={currentProfile} />;
-      case 'teams':         return <Teams profile={currentProfile} />;
-      case 'courses':       return <Courses profile={currentProfile} />;
-      case 'planning':      return <Planning profile={currentProfile} />;
-      case 'formation':     return <Formation profile={currentProfile} />;
-      case 'forum':         return <Forum profile={currentProfile} />;
-      case 'lesson-stocks': return <LessonStocks profile={currentProfile} />;
-      default:              return <Dashboard profile={currentProfile} />;
+      case "dashboard":
+        return <Dashboard profile={currentProfile} />;
+      case "children":
+        return (
+          <Children
+            profile={currentProfile}
+            openCreateDialog={openCreateChildFromAttendance}
+            onCreateDialogConsumed={() =>
+              setOpenCreateChildFromAttendance(false)
+            }
+          />
+        );
+      case "teachers":
+        return <Teachers profile={currentProfile} />;
+      case "teams":
+        return <Teams profile={currentProfile} />;
+      case "courses":
+        return <Courses profile={currentProfile} />;
+      case "attendance":
+        return (
+          <Attendance
+            profile={currentProfile}
+            onCreateChildRedirect={() => {
+              setOpenCreateChildFromAttendance(true);
+              setActiveModule("children");
+            }}
+          />
+        );
+      case "control-center":
+        return <ControlCenter />;
+      case "planning":
+        return <Planning profile={currentProfile} />;
+      case "formation":
+        return <Formation profile={currentProfile} />;
+      case "forum":
+        return <Forum profile={currentProfile} />;
+      case "lesson-stocks":
+        return <LessonStocks profile={currentProfile} />;
+      // Dans renderModule()
+      case "profile":
+        return (
+          <ProfilePage
+            profile={currentProfile}
+            onProfileUpdate={(updated) => setProfile(updated)}
+          />
+        );
+      default:
+        return <Dashboard profile={currentProfile} />;
     }
   };
 
@@ -158,13 +232,16 @@ function App() {
     <div className="min-h-screen bg-gray-50 md:p-4 flex gap-4 overflow-hidden relative">
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       {/* Sidebar */}
-      <aside className={`bg-white shadow-lg transition-all duration-300 flex flex-col z-50
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      <aside
+        className={`bg-white shadow-lg transition-all duration-300 flex flex-col z-50
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:rounded-3xl
         fixed md:relative inset-y-0 left-0
         w-64 md:w-64 h-screen md:h-[calc(100vh-2rem)]`}
@@ -177,8 +254,12 @@ function App() {
             </div>
             <h1 className="font-bold text-lg">Sunday School</h1>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}
-            className="md:hidden hover:bg-purple-100 hover:text-purple-600 rounded-xl transition-colors">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden hover:bg-purple-100 hover:text-purple-600 rounded-xl transition-colors"
+          >
             <X className="w-5 h-5" />
           </Button>
         </div>
@@ -188,22 +269,38 @@ function App() {
         </div>
 
         {/* User Info */}
+        {/* User Info → cliquable pour aller au profil */}
         <div className="px-4 mb-6 flex-shrink-0">
-          <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setActiveModule("profile");
+              setSidebarOpen(false);
+            }}
+            className={`w-full flex items-center gap-3 p-2 rounded-2xl transition-all ${
+              activeModule === "profile"
+                ? "bg-black text-white"
+                : "hover:bg-purple-50 hover:text-purple-600"
+            }`}
+          >
             <Avatar className="w-10 h-10">
+              <AvatarImage src={currentProfile.avatar_url ?? ""} />
               <AvatarFallback className="bg-gradient-to-br from-purple-500 to-purple-600 text-white font-semibold">
                 {currentProfile.full_name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate text-gray-900">{currentProfile.full_name}</p>
-              <p className="text-xs text-gray-500 capitalize">{currentProfile.role}</p>
+            <div className="flex-1 min-w-0 text-left">
+              <p
+                className={`font-semibold text-sm truncate ${activeModule === "profile" ? "text-white" : "text-gray-900"}`}
+              >
+                {currentProfile.full_name}
+              </p>
+              <p
+                className={`text-xs capitalize ${activeModule === "profile" ? "text-gray-300" : "text-gray-500"}`}
+              >
+                {currentProfile.role}
+              </p>
             </div>
-          </div>
-        </div>
-
-        <div className="px-4 mb-2 flex-shrink-0">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</p>
+          </button>
         </div>
 
         {/* Navigation */}
@@ -214,13 +311,18 @@ function App() {
                 const Icon = item.icon;
                 const isActive = activeModule === item.id;
                 return (
-                  <button key={item.id}
-                    onClick={() => { setActiveModule(item.id); setSidebarOpen(false); }}
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveModule(item.id);
+                      setSidebarOpen(false);
+                    }}
                     className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all ${
                       isActive
-                        ? 'bg-black text-white shadow-lg'
-                        : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
-                    }`}>
+                        ? "bg-black text-white shadow-lg"
+                        : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                    }`}
+                  >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <span className="font-medium text-sm">{item.label}</span>
                   </button>
@@ -231,12 +333,16 @@ function App() {
         </div>
 
         <div className="px-4 mb-2 flex-shrink-0">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">General</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            General
+          </p>
         </div>
 
         <div className="p-3 flex-shrink-0">
-          <button onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-red-600 hover:bg-red-50 transition-all">
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-red-600 hover:bg-red-50 transition-all"
+          >
             <LogOut className="w-5 h-5 flex-shrink-0" />
             <span className="font-medium text-sm">Logout</span>
           </button>
@@ -249,7 +355,12 @@ function App() {
           <h2 className="text-lg font-bold">
             {menuItems.find((item) => item.id === activeModule)?.label}
           </h2>
-          <Button variant="outline" size="icon" onClick={() => setSidebarOpen(true)} className="rounded-xl">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-xl"
+          >
             <Menu className="w-5 h-5" />
           </Button>
         </div>

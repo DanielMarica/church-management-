@@ -1,0 +1,198 @@
+### Variables
+@baseUrl = http://localhost:8080
+@teamId = 359758ea-e445-4283-9120-100e34b6c8f3
+@profileId = 29ac3d70-55e5-4bf3-900e-25ff1fbbbb80
+
+### ─────────────────────────────────────────────────────────────────────────────
+### FOOD STOCKS — Créer les produits (sans photo d'abord)
+### ─────────────────────────────────────────────────────────────────────────────
+
+### 1. Bonbons Haribo
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Bonbons Haribo",
+  "category": "bonbon",
+  "packets_count": 20,
+  "pieces_per_packet": 10,
+  "purchased_at": "2026-03-10",
+  "expires_at": "2026-09-01",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### 2. Bonbons Schtroumpfs
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Bonbons Schtroumpfs",
+  "category": "bonbon",
+  "packets_count": 15,
+  "pieces_per_packet": 12,
+  "purchased_at": "2026-03-10",
+  "expires_at": "2026-08-15",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### 3. Cookies Pepperidge Farm
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Cookies Pepperidge Farm",
+  "category": "biscuit",
+  "packets_count": 10,
+  "pieces_per_packet": 20,
+  "purchased_at": "2026-03-08",
+  "expires_at": "2026-06-30",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### 4. Gaufres Lotus
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Gaufres Lotus",
+  "category": "biscuit",
+  "packets_count": 12,
+  "pieces_per_packet": 8,
+  "purchased_at": "2026-03-05",
+  "expires_at": "2026-07-20",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### 5. Biscuits Prince
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Biscuits Prince",
+  "category": "biscuit",
+  "packets_count": 18,
+  "pieces_per_packet": 16,
+  "purchased_at": "2026-03-01",
+  "expires_at": "2026-12-01",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### 6. Caramels mous
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Caramels mous",
+  "category": "bonbon",
+  "packets_count": 8,
+  "pieces_per_packet": 15,
+  "purchased_at": "2026-03-12",
+  "expires_at": "2026-05-01",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### 7. Choco BN
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Choco BN",
+  "category": "biscuit",
+  "packets_count": 6,
+  "pieces_per_packet": 24,
+  "purchased_at": "2026-02-20",
+  "expires_at": "2026-03-18",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### 8. Sachets surprises
+POST {{baseUrl}}/api/food-stocks
+Content-Type: application/json
+
+{
+  "name": "Sachets surprises",
+  "category": "autre",
+  "packets_count": 5,
+  "pieces_per_packet": 30,
+  "purchased_at": "2026-03-12",
+  "expires_at": "2026-10-01",
+  "created_by": "{{profileId}}"
+}
+
+###
+
+### ─────────────────────────────────────────────────────────────────────────────
+### FOOD STOCKS — Voir tous les produits
+### ─────────────────────────────────────────────────────────────────────────────
+
+### Voir tous les stocks
+GET {{baseUrl}}/api/food-stocks
+
+###
+
+### ─────────────────────────────────────────────────────────────────────────────
+### FOOD REQUESTS — Demande de nourriture
+### ─────────────────────────────────────────────────────────────────────────────
+
+### Récupérer les sessions de planning (pour avoir un planning_id)
+GET {{baseUrl}}/api/control/planning-sessions
+
+###
+
+### Créer une demande de nourriture (remplace PLANNING_ID par un vrai UUID)
+POST {{baseUrl}}/api/control/food-requests
+Content-Type: application/json
+
+{
+  "team_id": "{{teamId}}",
+  "planning_id": "REMPLACE_PAR_PLANNING_ID",
+  "children_count": 83,
+  "submitted_by": "{{profileId}}",
+  "notes": "Prévoir un peu plus pour les nouveaux"
+}
+
+###
+
+### Voir les demandes admin (toutes les équipes)
+GET {{baseUrl}}/api/control/food-requests?planning_id=REMPLACE_PAR_PLANNING_ID&is_admin=true
+
+###
+
+### ─────────────────────────────────────────────────────────────────────────────
+### PRINT REQUESTS — Demandes d'impression
+### ─────────────────────────────────────────────────────────────────────────────
+
+### Voir toutes les demandes (admin)
+GET {{baseUrl}}/api/control/print-requests?is_admin=true
+
+###
+
+### Voir mes demandes (teacher)
+GET {{baseUrl}}/api/control/print-requests?profile_id={{profileId}}
+
+###
+
+### Marquer comme imprimé (remplace PRINT_ID)
+PATCH {{baseUrl}}/api/control/print-requests/REMPLACE_PAR_PRINT_ID
+Content-Type: application/json
+
+{
+  "status": "printed",
+  "admin_comment": "Imprimé en 2 exemplaires, disponible au bureau"
+}
+
+###

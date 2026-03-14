@@ -16,12 +16,14 @@ export const ChildSchema = z.object({
   special_needs: z.string().nullable(),
   emergency_contact: z.string().nullable(),
   notes: z.string().nullable(),
+  photo_url: z.string().url().nullable().optional(), 
   is_active: z.boolean(),
   created_at: z.string(),
   updated_at: z.string(),
 });
 
 export const CreateChildSchema = z.object({
+  photo_url: z.string().url().nullable().optional(),
   first_name: z.string().min(1, "Le prénom est requis"),
   last_name: z.string().min(1, "Le nom est requis"),
   date_of_birth: z

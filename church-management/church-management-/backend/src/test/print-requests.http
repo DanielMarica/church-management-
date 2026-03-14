@@ -1,0 +1,130 @@
+### Variables
+@baseUrl = http://localhost:8080
+@teamId = 359758ea-e445-4283-9120-100e34b6c8f3
+@profileId = 29ac3d70-55e5-4bf3-900e-25ff1fbbbb80
+
+### ─────────────────────────────────────────────────────────────────────────────
+### PRINT REQUESTS — Créer des demandes (sans fichier)
+### ─────────────────────────────────────────────────────────────────────────────
+
+### 1. Demande feuilles d'activité
+POST {{baseUrl}}/api/control/print-requests
+Content-Type: application/json
+
+{
+  "description": "Feuilles d'activité coloriage - thème Noé et l'arche, 30 exemplaires",
+  "submitted_by": "{{profileId}}",
+  "team_id": "{{teamId}}"
+}
+
+###
+
+### 2. Demande versets à apprendre
+POST {{baseUrl}}/api/control/print-requests
+Content-Type: application/json
+
+{
+  "description": "Versets de la semaine à distribuer aux enfants - Jean 3:16, format A5, 25 copies",
+  "submitted_by": "{{profileId}}",
+  "team_id": "{{teamId}}"
+}
+
+###
+
+### 3. Demande planning mensuel
+POST {{baseUrl}}/api/control/print-requests
+Content-Type: application/json
+
+{
+  "description": "Planning du mois d'Avril 2026 pour affichage en salle, format A3",
+  "submitted_by": "{{profileId}}",
+  "team_id": "{{teamId}}"
+}
+
+###
+
+### 4. Demande badges enfants
+POST {{baseUrl}}/api/control/print-requests
+Content-Type: application/json
+
+{
+  "description": "Badges avec prénoms pour les nouveaux enfants inscrits ce mois - 12 badges",
+  "submitted_by": "{{profileId}}",
+  "team_id": "{{teamId}}"
+}
+
+###
+
+### 5. Demande certificats présence
+POST {{baseUrl}}/api/control/print-requests
+Content-Type: application/json
+
+{
+  "description": "Certificats de présence pour les enfants assidus du trimestre, 8 certificats avec cadre",
+  "submitted_by": "{{profileId}}",
+  "team_id": "{{teamId}}"
+}
+
+###
+
+### ─────────────────────────────────────────────────────────────────────────────
+### PRINT REQUESTS — Avec fichier (utilise curl dans le terminal)
+### ─────────────────────────────────────────────────────────────────────────────
+###
+### curl -X POST http://localhost:8080/api/control/print-requests \
+###   -F "description=Coloriage Arche de Noé" \
+###   -F "submitted_by={{profileId}}" \
+###   -F "team_id={{teamId}}" \
+###   -F "file=@/chemin/vers/fichier.pdf"
+###
+### ─────────────────────────────────────────────────────────────────────────────
+
+### ─────────────────────────────────────────────────────────────────────────────
+### PRINT REQUESTS — Admin actions
+### ─────────────────────────────────────────────────────────────────────────────
+
+### Voir toutes les demandes (admin)
+GET {{baseUrl}}/api/control/print-requests?is_admin=true
+
+###
+
+### Voir mes demandes (teacher)
+GET {{baseUrl}}/api/control/print-requests?profile_id={{profileId}}
+
+###
+
+### Marquer comme imprimé + commentaire (remplace PRINT_ID)
+PATCH {{baseUrl}}/api/control/print-requests/REMPLACE_PAR_PRINT_ID
+Content-Type: application/json
+
+{
+  "status": "printed",
+  "admin_comment": "Imprimé en 30 copies, disponible au bureau d'accueil dimanche matin"
+}
+
+###
+
+### Ajouter un commentaire sans changer le statut
+PATCH {{baseUrl}}/api/control/print-requests/REMPLACE_PAR_PRINT_ID
+Content-Type: application/json
+
+{
+  "admin_comment": "Reçu, sera imprimé vendredi"
+}
+
+###
+
+### Remettre en attente
+PATCH {{baseUrl}}/api/control/print-requests/REMPLACE_PAR_PRINT_ID
+Content-Type: application/json
+
+{
+  "status": "pending"
+}
+
+###
+
+### Supprimer une demande
+DELETE {{baseUrl}}/api/control/print-requests/REMPLACE_PAR_PRINT_ID
+
+###
